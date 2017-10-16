@@ -51,7 +51,7 @@ def get_outliers(df, min_cluster=10, min_sample=10, plot=False):
     outliers = np.zeros((data.shape[0],1))
     outliers[outliers_idx] = 1
 
-    outliers = pd.DataFrame(data=outliers, index=time_idx, columns=[location + ' outlier'])
+    outliers = pd.DataFrame(data=outliers, index=time_idx, columns=[location])
 
     if plot:
         dts = list(map(lambda x: x.to_pydatetime(), time_idx))
