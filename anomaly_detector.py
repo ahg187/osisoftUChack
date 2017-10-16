@@ -18,7 +18,7 @@ import datetime as dt
 import seaborn as sns
 
 
-def get_outliers(df, plot=False):
+def get_outliers(df, min_cluster=10, min_sample=10, plot=False):
 
     # drop columns if values are constant
     # drop columns if too little non-nan values in column
@@ -41,7 +41,7 @@ def get_outliers(df, plot=False):
     scaler = StandardScaler()
     data_scl = scaler.fit_transform(X=data)
 
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=15).fit(data_scl)
+    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster, min_samples=min_sample).fit(data_scl)
 
     #sns.distplot(clusterer.outlier_scores_[np.isfinite(clusterer.outlier_scores_)], rug=True)
 
@@ -54,13 +54,18 @@ def get_outliers(df, plot=False):
     outliers = pd.DataFrame(data=outliers, index=time_idx, columns=[location + ' outlier'])
 
     if plot:
-
+        dts = list(map(lambda x: x.to_pydatetime(), time_idx))
+        fds = dates.date2num(dts)
+        hfmt = dates.DateFormatter('%Y-%m-%d %H:%M')
         times = np.zeros(data.shape)
-        for i in range(times.shape[1]):
-            times[:,i] = time_idx
 
-        plt.scatter(times.T, data.T,  s=50, linewidth=0, c='gray', alpha=0.25)
-        plt.scatter(times[outliers_idx,:].T, data[outliers_idx,:].T, s=50, linewidth=0, c='red', alpha=0.5)
+        for i in range(times.shape[1]):
+            times[:,i] = fds
+
+        fig, ax = plt.subplots(1,1)
+        ax.scatter(times.T, data.T,  s=50, linewidth=0, c='gray', alpha=0.25)
+        ax.scatter(times[outliers_idx,:].T, data[outliers_idx,:].T, s=50, linewidth=0, c='red', alpha=0.5)
+        ax.xaxis.set_major_formatter(hfmt)
 
 
     return outliers

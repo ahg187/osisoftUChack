@@ -10,7 +10,7 @@ import datetime as dt
 import numpy as np
 from osisoft.pidevclub.piwebapi.pi_web_api_client import PIWebApiClient
 
-client = PIWebApiClient("https://proghackuc2017.osisoft.com/piwebapi", False, "hacker24", "blueAleDoor#4", True)
+client = PIWebApiClient("https://proghackuc2017.osisoft.com/piwebapi", False, "hacker22", "orangeTigerGlas#7", True)
 
 
 def get_sub_element_names(base_path):
@@ -51,6 +51,7 @@ def get_data_frame_for_level(base_path, resolution, history, sub_path=""):
         df = pd.DataFrame()
 
         for path in paths:
+            print(path)
             df_tmp = client.data.get_recorded_values(path, None, None, None, None, None, 150000,
                                                      None, "*-" + str(history) + "d", None)
 
