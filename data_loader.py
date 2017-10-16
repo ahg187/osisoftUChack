@@ -48,30 +48,40 @@ def get_data_frame_for_level(base_path, resolution, history, sub_path=""):
 
         attribute_names = get_sub_attribute_names(base_path + "\\" + element_name, sub_path)
         paths = [af_base_path + element_name + sub_path + "|" + attribute for attribute in attribute_names]
-        df = pd.DataFrame()
 
-        for path in paths:
-            print(path)
-            df_tmp = client.data.get_recorded_values(path, None, None, None, None, None, 150000,
-                                                     None, "*-" + str(history) + "d", None)
+        # dfs_tmp = client.data.get_multiple_recorded_values(paths, None, None, None, None, 50000, None, "*-" + str(history) + "d", None)
 
-            df_tmp = df_tmp.loc[:, ['Timestamp', 'Value']]
-            is_numeric = lambda x: type(x) in [int, np.int64, float, np.float64]
-            parser = lambda x: dt.datetime.strptime(x[:19], "%Y-%m-%dT%H:%M:%S")
+        df = client.data.get_multiple_interpolated_values(paths, start_time="*-" + str(history) + "d", interval=resolution, end_time='*-20d', filter_expression=None, include_filtered_values=False, selected_fields=None, time_zone=None)
 
-            df_tmp.Timestamp = df_tmp.Timestamp.apply(parser)
-            df_tmp = df_tmp[df_tmp.Value.apply(is_numeric)]
+        # df = pd.DataFrame()
+        #
+        # for path in paths:
+        #     df_tmp = dfs_tmp[path].loc[:, ['Timestamp', 'Value']]
+        #     is_numeric = lambda x: type(x) in [int, np.int64, float, np.float64]
+        #     parser = lambda x: dt.datetime.strptime(x[:19], "%Y-%m-%dT%H:%M:%S")
+        #
+        #     df_tmp.Timestamp = df_tmp.Timestamp.apply(parser)
+        #     df_tmp = df_tmp[df_tmp.Value.apply(is_numeric)]
+        #
+        #     df_tmp.index = df_tmp.Timestamp
+        #     df_tmp = df_tmp.drop('Timestamp', axis=1)
+        #
+        #     name = path.split('|')[-1]
+        #     df_tmp.columns.values[0] = name
+        #
+        #     df = df.merge(right=df_tmp, how='outer', left_index=True, right_index=True)
+        #
+        # df = df.astype(np.float32)
+        # df = df.resample(resolution).mean()
 
-            df_tmp.index = df_tmp.Timestamp
-            df_tmp = df_tmp.drop('Timestamp', axis=1)
 
-            name = path.split('|')[-1]
-            df_tmp.columns.values[0] = name
-
-            df = df.merge(right=df_tmp, how='outer', left_index=True, right_index=True)
-
-        df = df.astype(np.float32)
-        df = df.resample(resolution).mean()
+        parser = lambda x: dt.datetime.strptime(x[:19], "%Y-%m-%dT%H:%M:%S")
+        is_numeric = lambda x: type(x) in [int, np.int64, float, np.float64]
+        df = df.loc[:,['Timestamp1', 'Value1', 'Value2','Value3']]
+        df.Timestamp1 = df.Timestamp1.apply(parser)
+        df.index = df.Timestamp1
+        df = df.drop('Timestamp1', axis=1)
+        # df = df[df.apply(is_numeric)]
 
         df['location'] = element_name
 
@@ -97,5 +107,9 @@ def get_qual_data(level='site', resolution='12H', history=2000):
                     "nano::station"
 
         out = get_data_frame_for_level(base_path, resolution, history)
-            
+
+
     return out
+
+
+# df = get_qual_data(level='site', resolution='12H', history=30)
