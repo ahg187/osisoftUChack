@@ -54,3 +54,5 @@ def get_qual_data(level='site', resolution='12H', history=2000):
             out = pd.concat([out,df])
             
     return out
+
+
