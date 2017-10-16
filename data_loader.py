@@ -13,16 +13,47 @@ from osisoft.pidevclub.piwebapi.pi_web_api_client import PIWebApiClient
 client = PIWebApiClient("https://proghackuc2017.osisoft.com/piwebapi", False, "hacker24", "blueAleDoor#4", True)
 
 
-def get_data_frame_for_level(base_path, element_names, attributes, resolution, history):
-    out = pd.DataFrame()
+def get_sub_element_names(base_path):
+    base_element = client.element.get_by_path(base_path, None)
+    elements = client.element.get_elements(base_element.web_id, None, None, None, None, None, None, None, None,
+                                           None, None, None)
 
-    for site in element_names:
-        paths = [base_path + site + attribute for attribute in attributes]
+    element_list = []
+
+    for item in elements.items:
+        element_list.append(item.name)
+
+    return element_list
+
+
+def get_sub_attribute_names(base_path, sub_path=""):
+    base_element = client.element.get_by_path(base_path + sub_path, None)
+    attributes = client.element.get_attributes(base_element.web_id, None, None, None, None, None, None, None, None,
+                                               None, None, None, "Double")
+
+    attribute_list = []
+
+    for item in attributes.items:
+        if item.name not in ['Latitude', 'Longitude']:
+            attribute_list.append(item.name)
+
+    return attribute_list
+
+
+def get_data_frame_for_level(base_path, resolution, history, sub_path=""):
+    af_base_path = "af:" + base_path + "\\"
+    element_names = get_sub_element_names(base_path)
+    out = pd.DataFrame()
+    for element_name in element_names:
+
+        attribute_names = get_sub_attribute_names(base_path + "\\" + element_name, sub_path)
+        paths = [af_base_path + element_name + sub_path + "|" + attribute for attribute in attribute_names]
         df = pd.DataFrame()
 
         for path in paths:
-            df_tmp = client.data.get_recorded_values(path, None, None, "*-" + str(history) + "d", None, None, 100000,
-                                                     None, "*-10d", None)
+            df_tmp = client.data.get_recorded_values(path, None, None, None, None, None, 150000,
+                                                     None, "*-" + str(history) + "d", None)
+
             df_tmp = df_tmp.loc[:, ['Timestamp', 'Value']]
             is_numeric = lambda x: type(x) in [int, np.int64, float, np.float64]
             parser = lambda x: dt.datetime.strptime(x[:19], "%Y-%m-%dT%H:%M:%S")
@@ -41,47 +72,32 @@ def get_data_frame_for_level(base_path, element_names, attributes, resolution, h
         df = df.astype(np.float32)
         df = df.resample(resolution).mean()
 
-        df['location'] = site
+        df['location'] = element_name
 
-        return pd.concat([out, df])
+        out = pd.concat([out, df])
+
+    return out
 
 
 def get_qual_data(level='site', resolution='12H', history=2000):
     if level == 'site':
-        base_path = "af:\\\\SATURN024\\Vitens\\Vitens\\Friesland province\\01 Production sites\\"
-        prod_sites = ["Production Site Noordbergum", "Production Site Oldeholtpade", "Production Site Spannenburg",
-                      "Production Site Terwisscha"]
+        base_path = "\\\\SATURN024\\Vitens\\Vitens\\Friesland province\\01 Production sites"
 
-        qual_signals = ["\\Distribution\\Quality|pH", "\\Distribution\\Quality|Conductivity",
-                        "\\Distribution\\Quality|Turbidity"]
-
-        out = get_data_frame_for_level(base_path, prod_sites, qual_signals, resolution, history)
+        out = get_data_frame_for_level(base_path, resolution, history, "\\Distribution\\Quality")
 
     elif level == 'intellitect':
-        base_path = "af:\\\\SATURN024\\Vitens\\Vitens\\Friesland province\\03 Peripheral measurements\\Intellitect " \
-                    "Intellisonde\\"
+        base_path = "\\\\SATURN024\\Vitens\\Vitens\\Friesland province\\03 Peripheral measurements\\Intellitect " \
+                    "Intellisonde"
 
-        prod_intellitects = ["Location FR-OWIR1", "Location FR-PNB_1", "Location FR-PNB_2", "Location FR-RFNK1",
-                             "Location FR-RLWG1"]
+        out = get_data_frame_for_level(base_path, resolution, history)
 
-        measurements = ["|Conductivity", "|ORP", "|pH", "|Temperature"]
+    elif level == 'nano':
+        base_path = "\\\\SATURN024\\Vitens\\Vitens\\Friesland province\\03 Peripheral measurements\\s::can " \
+                    "nano::station"
 
-        out = get_data_frame_for_level(base_path, prod_intellitects, measurements, resolution, history)
-
-    elif level == 'stations':
-        base_path = "af:\\\\SATURN024\\Vitens\\Vitens\\Friesland province\\03 Peripheral measurements\\s::can " \
-                    "nano::station\\"
-
-        prod_stations = ["Location FR-MDKM", "Location FR-MFRI", "Location FR-MLAB", "Location FR-MLWU",
-                             "Location FR-MNBU", "Location FR-MRGR", "Location FR-MRSH", "Location FR-MRSJ",
-                             "Location FR-MSBA", "Location FR-MWIA"]
-
-        measurements = ["|COLORapp", "|COLORtru", "|Conductivity", "|DOCeq", "|DOCeq2", "|Flow", "|pH", "|Temperature",
-                        "|TOCeq2", "|Turb_EPA", "|Turb_ISO", "|UV254"]
-
-        out = get_data_frame_for_level(base_path, prod_stations, measurements, resolution, history)
+        out = get_data_frame_for_level(base_path, resolution, history)
             
     return out
 
 
-df = get_qual_data(level='stations')
+df = get_qual_data(level='site', history=2000)
