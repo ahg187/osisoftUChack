@@ -21,7 +21,7 @@ from anomaly_detector import get_outliers
 
 
 # get data
-df = data_loader.get_qual_data(level='nano', resolution='12H', history=200)
+df = data_loader.get_qual_data(level='nano', resolution='12H', history=40)
 
 outliers = get_outliers(df.loc[df.location==df.location.unique()[0], :], plot=True, min_cluster=5, min_sample=1)
 

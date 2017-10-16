@@ -77,17 +77,17 @@ def get_data_frame_for_level(base_path, resolution, history, sub_path=""):
 
         parser = lambda x: dt.datetime.strptime(x[:19], "%Y-%m-%dT%H:%M:%S")
         is_numeric = lambda x: type(x) in [int, np.int64, float, np.float64]
-        df = df.loc[:,['Timestamp1', 'Value1', 'Value2','Value3']]
+        df = df.loc[:,['Timestamp1'] + ['Value'+str(i) for i in range(1,len(attribute_names)+1)]]
         df.Timestamp1 = df.Timestamp1.apply(parser)
         df.index = df.Timestamp1
         df = df.drop('Timestamp1', axis=1)
         # df = df[df.apply(is_numeric)]
-
-        df['location'] = element_name
-
+        df.columns = attribute_names
         out = pd.concat([out, df])
 
     return out
+
+
 
 
 def get_qual_data(level='site', resolution='12H', history=2000):
@@ -112,4 +112,4 @@ def get_qual_data(level='site', resolution='12H', history=2000):
     return out
 
 
-# df = get_qual_data(level='site', resolution='12H', history=30)
+df = get_qual_data(level='site', resolution='12H', history=30)
