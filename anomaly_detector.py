@@ -28,7 +28,7 @@ def get_outliers(df, min_cluster=10, min_sample=10, plot=False):
         if col == 'location':
             continue
         else:
-            vals = df.iloc[:,i].values
+            vals = df.iloc[:,i].values.astype(float)
             ratio_nan = np.sum(np.isnan(vals)) / len(vals)
             if np.nanstd(vals) == 0.0 or ratio_nan > 0.5:
                 cols_delete.append(col)
@@ -37,7 +37,7 @@ def get_outliers(df, min_cluster=10, min_sample=10, plot=False):
     location = df.location.unique()[0]
     data = df.loc[df.location==location, cols].dropna()
     time_idx = data.index
-    data = data.values
+    data = data.values.astype(float)
     scaler = StandardScaler()
     data_scl = scaler.fit_transform(X=data)
 

@@ -83,7 +83,14 @@ def get_data_frame_for_level(base_path, resolution, history, sub_path=""):
         df = df.drop('Timestamp1', axis=1)
         # df = df[df.apply(is_numeric)]
         df.columns = attribute_names
+
+        for col in df.columns.values:
+            df = df[pd.to_numeric(df[col], errors='coerce').notnull()]
+
+        df['location'] = element_name
+
         out = pd.concat([out, df])
+
 
     return out
 
