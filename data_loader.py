@@ -24,7 +24,6 @@ def get_qual_data(level='site', resolution='12H', history=2000):
         for site in prod_sites:
             qual_signals = ["\\Distribution\\Quality|pH", "\\Distribution\\Quality|Conductivity", "\\Distribution\\Quality|Turbidity"]
             paths = [base_path + site + qual_signal for qual_signal in qual_signals]
-            df_dict = client.data.get_multiple_recorded_values(paths, None, "*", None, None, None, None, "*-"+str(history)+"d", None)
             df = pd.DataFrame()
 
             for path in paths:
@@ -60,11 +59,9 @@ def get_qual_data(level='site', resolution='12H', history=2000):
 
         out = pd.DataFrame()
 
-        for site in prod_intellitects:
+        for intellitect in prod_intellitects:
             measurements = ["|Conductivity", "|ORP", "|pH", "|Temperature"]
-            paths = [base_path + site + measurement for measurement in measurements]
-            df_dict = client.data.get_multiple_recorded_values(paths, None, "*", None, None, None, None,
-                                                               "*-" + str(history) + "d", None)
+            paths = [base_path + intellitect + measurement for measurement in measurements]
             df = pd.DataFrame()
 
             for path in paths:
@@ -88,7 +85,7 @@ def get_qual_data(level='site', resolution='12H', history=2000):
             df = df.astype(np.float32)
             df = df.resample(resolution).mean()
 
-            df['location'] = site
+            df['location'] = intellitect
 
             out = pd.concat([out, df])
             
