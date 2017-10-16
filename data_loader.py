@@ -98,6 +98,3 @@ def get_qual_data(level='site', resolution='12H', history=2000):
         out = get_data_frame_for_level(base_path, resolution, history)
             
     return out
-
-
-df = get_qual_data(level='site', history=2000)
