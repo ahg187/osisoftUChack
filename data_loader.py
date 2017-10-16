@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Created on Mon Oct 16 14:24:12 2017
+
+@author: hacker22
+"""
 
 import pandas as pd
 import datetime as dt
@@ -7,7 +12,7 @@ from osisoft.pidevclub.piwebapi.pi_web_api_client import PIWebApiClient
 
 client = PIWebApiClient("https://proghackuc2017.osisoft.com/piwebapi", False, "hacker22", "orangeTigerGlas#7", True)  
 
-def get_qual_data(level='site', resolution='12H' history=2000):
+def get_qual_data(level='site', resolution='12H', history=2000):
 
     if level == 'site':
         
@@ -28,7 +33,7 @@ def get_qual_data(level='site', resolution='12H' history=2000):
                 df_tmp = client.data.get_recorded_values(path, None, None, "*-"+str(history)+"d", None, None, 100000, None, "*-10d", None)
                 df_tmp = df_tmp.loc[:,['Timestamp','Value']]
                 is_numeric = lambda x: type(x) in [int, np.int64, float, np.float64]
-                parser = lambda x: dt.datetime.strptime(x, "%Y-%m-%dT%H:%M:%SZ")
+                parser = lambda x: dt.datetime.strptime(x[:19], "%Y-%m-%dT%H:%M:%S")
                 
                 df_tmp.Timestamp = df_tmp.Timestamp.apply(parser)
                 df_tmp = df_tmp[df_tmp.Value.apply(is_numeric)]
