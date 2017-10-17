@@ -30,6 +30,7 @@ def get_outliers(df, min_cluster=10, min_sample=10, plot=False):
         else:
             vals = df.iloc[:,i].values.astype(float)
             ratio_nan = np.sum(np.isnan(vals)) / len(vals)
+            print('ratio_nan',ratio_nan)
             if np.nanstd(vals) == 0.0 or ratio_nan > 0.5:
                 cols_delete.append(col)
 
