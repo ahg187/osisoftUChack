@@ -11,13 +11,15 @@ import numpy as np
 from osisoft.pidevclub.piwebapi.pi_web_api_client import PIWebApiClient
 
 client = PIWebApiClient("https://proghackuc2017.osisoft.com/piwebapi", False, "hacker23", "sickElephantHome#4", True)
+# client = PIWebApiClient("https://proghackuc2017.osisoft.com/piwebapi", False, "hacker24", "blueAleDoor#4", True)
 
 
 def get_sub_element_names(base_path):
     base_element = client.element.get_by_path(base_path, None)
+    print(base_element)
     elements = client.element.get_elements(base_element.web_id, None, None, None, None, None, None, None, None,
                                            None, None, None)
-
+    print(elements)
     element_list = []
 
     for item in elements.items:
@@ -50,9 +52,9 @@ def get_data_frame_for_level(base_path, resolution, history, sub_path=""):
         paths = [af_base_path + element_name + sub_path + "|" + attribute for attribute in attribute_names]
 
         # dfs_tmp = client.data.get_multiple_recorded_values(paths, None, None, None, None, 50000, None, "*-" + str(history) + "d", None)
+        print(paths)
 
         df = client.data.get_multiple_interpolated_values(paths, start_time="*-" + str(history) + "d", interval=resolution, end_time='*-20d', filter_expression=None, include_filtered_values=False, selected_fields=None, time_zone=None)
-
         # df = pd.DataFrame()
         #
         # for path in paths:

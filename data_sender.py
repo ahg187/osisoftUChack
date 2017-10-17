@@ -29,12 +29,12 @@ def send_outlier_values(outlier_list, path_list):
 
         stream_values.items = values
         path = path_list[i] + '|Qual_anomaly_trg'
-        print(path)
         stream_values.web_id = client.attribute.get_by_path(path, None).links['Point'].split('/')[-1]
-        stream_values_list.append(stream_values)
+        #stream_values_list.append(stream_values)
+        stream_values_list = [stream_values]
 
-    response = client.streamSet.update_values_ad_hoc_with_http_info(stream_values_list, None, None)
-    return response
+        response = client.streamSet.update_values_ad_hoc_with_http_info(stream_values_list, None, None)
+        return response
 
 
 
