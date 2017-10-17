@@ -10,7 +10,7 @@ import datetime as dt
 import numpy as np
 from osisoft.pidevclub.piwebapi.pi_web_api_client import PIWebApiClient
 
-client = PIWebApiClient("https://proghackuc2017.osisoft.com/piwebapi", False, "hacker22", "orangeTigerGlas#7", True)
+client = PIWebApiClient("https://proghackuc2017.osisoft.com/piwebapi", False, "hacker23", "sickElephantHome#4", True)
 
 
 def get_sub_element_names(base_path):
@@ -34,7 +34,7 @@ def get_sub_attribute_names(base_path, sub_path=""):
     attribute_list = []
 
     for item in attributes.items:
-        if item.name not in ['Latitude', 'Longitude']:
+        if item.name not in ['Latitude', 'Longitude', 'Qual_anomaly_trg']:
             attribute_list.append(item.name)
 
     return attribute_list
@@ -92,31 +92,32 @@ def get_data_frame_for_level(base_path, resolution, history, sub_path=""):
         out = pd.concat([out, df])
 
 
-    return out
+    return out, element_names
 
 
 
 
 def get_qual_data(level='site', resolution='12H', history=2000):
     if level == 'site':
-        base_path = "\\\\SATURN024\\Vitens\\Vitens\\Friesland province\\01 Production sites"
-
-        out = get_data_frame_for_level(base_path, resolution, history, "\\Distribution\\Quality")
+        base_path = "\\\\SATURN023\\Vitens\\Vitens\\Friesland province\\01 Production sites"
+        sub_path = "\\Distribution\\Quality"
+        out, elements = get_data_frame_for_level(base_path, resolution, history, sub_path)
 
     elif level == 'intellitect':
-        base_path = "\\\\SATURN024\\Vitens\\Vitens\\Friesland province\\03 Peripheral measurements\\Intellitect " \
+        base_path = "\\\\SATURN023\\Vitens\\Vitens\\Friesland province\\03 Peripheral measurements\\Intellitect " \
                     "Intellisonde"
 
-        out = get_data_frame_for_level(base_path, resolution, history)
+        sub_path = ""
+        out, elements = get_data_frame_for_level(base_path, resolution, history)
 
     elif level == 'nano':
-        base_path = "\\\\SATURN024\\Vitens\\Vitens\\Friesland province\\03 Peripheral measurements\\s::can " \
+        base_path = "\\\\SATURN023\\Vitens\\Vitens\\Friesland province\\03 Peripheral measurements\\s::can " \
                     "nano::station"
 
-        out = get_data_frame_for_level(base_path, resolution, history)
+        sub_path = ""
+        out, elements = get_data_frame_for_level(base_path, resolution, history)
 
+    path_list = [base_path + '\\' + element + sub_path for element in elements]
 
-    return out
+    return out, path_list
 
-
-df = get_qual_data(level='site', resolution='12H', history=30)
